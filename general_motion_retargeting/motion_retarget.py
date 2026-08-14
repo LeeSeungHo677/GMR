@@ -20,6 +20,7 @@ class GeneralMotionRetargeting:
         verbose: bool=True,
         use_velocity_limit: bool=False,
         self_collision_pairs=None,
+        freeze_joints=None,
     ) -> None:
 
         # load the robot model
@@ -95,6 +96,17 @@ class GeneralMotionRetargeting:
 
         self.task_errors1 = {}
         self.task_errors2 = {}
+
+        # 특정 관절을 IK가 못 쓰게 고정한다. 충돌 회피 제약은 목표 태스크가 없는
+        # 관절(예: 머리)도 자유롭게 써서 링크를 피하는데, X2 head_pitch는 실기
+        # 펌웨어에서 잠겨 있어(가동범위 0) 그렇게 만든 참조 모션은 재현 불가다.
+        # 가동범위를 0으로 좁히면 ConfigurationLimit이 그 관절을 붙잡는다.
+        if freeze_joints:
+            for jname in freeze_joints:
+                jid = mj.mj_name2id(self.model, mj.mjtObj.mjOBJ_JOINT, jname)
+                if jid >= 0:
+                    self.model.jnt_range[jid] = [-1e-6, 1e-6]
+                    self.model.jnt_limited[jid] = 1
 
         self.ik_limits = [mink.ConfigurationLimit(self.model)]
         if use_velocity_limit:
