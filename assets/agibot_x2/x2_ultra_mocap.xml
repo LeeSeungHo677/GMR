@@ -67,6 +67,13 @@
     <body name="pelvis" pos="0 0 0.68" euler="0 0 0" childclass="x2">
       <light name="tracking" mode="trackcom" pos="0 0 2"/>
       <freejoint name="floating_base_joint"/>
+      <!-- 업스트림 MJCF 버그 보정: 32개 body 중 pelvis에만 <inertial>이 없어
+           MuJoCo가 메시 부피×기본밀도로 5.032kg을 추정했다(총질량 43.475kg).
+           URDF v1.3.0 값(3.5235kg)을 명시해 총질량을 41.967kg으로 맞춘다.
+           URDF가 정본인 근거: 공식 시뮬 모델 x2t2.5와 URDF가 31/31 일치하고
+           (docs/rl_deploy_spec.md §5), 학습(IsaacLab)도 URDF를 쓴다. -->
+      <inertial pos="-0.001209 -0.000023 -0.002011" mass="3.5235"
+                fullinertia="0.0126 0.007924 0.012417 0 0.000163 -0.000005"/>
       <geom class="visual" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.298039 0.298039 0.298039 1" mesh="pelvis"/>
       <geom class="collision"  type="mesh" rgba="0.298039 0.298039 0.298039 1" mesh="pelvis"/>
       <geom class="visual" pos="0.0239465 -0.000228682 0.04171" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="imu_in_pelvis_link"/>
